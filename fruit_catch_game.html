@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>營養接接樂</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      overflow: hidden;
+    }
+    .screen {
+      display: none;
+      width: 100vw;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background-size: cover;
+      background-position: center;
+    }
+    .active {
+      display: flex;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 20px;
+      margin-top: 20px;
+    }
+    #levelNotice {
+      position: absolute;
+      top: 40%;
+      width: 100%;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      background-color: rgba(255,255,255,0.8);
+      padding: 20px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="home" class="screen active" style="background-image: url('images/cover.png');">
+    <h1 style="color:white; text-shadow:1px 1px 2px black;">營養接接樂</h1>
+    <button onclick="showScreen('intro')">開始</button>
+  </div>
+
+  <div id="intro" class="screen" style="background-image: url('images/intro.png');">
+    <h2>遊戲說明</h2>
+    <p>請依照順序接住正確的食物：</p>
+    <ol>
+      <li>第一關：只吃健康肉（+2分）</li>
+      <li>第二關：只吃健康蔬菜（+2分）</li>
+      <li>第三關：只吃健康澱粉（+2分）</li>
+    </ol>
+    <p>吃錯會扣分喔！不健康食物扣2分，吃錯類別扣1分。</p>
+    <button onclick="startGame(1)">開始遊戲</button>
+  </div>
+
+  <canvas id="gameCanvas" width="400" height="600" class="screen"></canvas>
+  <div id="levelNotice"></div>
+
+  <div id="result" class="screen">
+    <h2>遊戲結束</h2>
+    <div id="scoreResult"></div>
+    <button onclick="restartGame()">再玩一次</button>
+  </div>
+
+  <script>
+    const screens = {
+      home: document.getElementById("home"),
+      intro: document.getElementById("intro"),
+      gameCanvas: document.getElementById("gameCanvas"),
+      result: document.getElementById("result")
+    };
+    const levelNotice = document.getElementById("levelNotice");
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let currentLevel = 1;
+    let score = 0;
+    let remainingDrops = 10;
+    let backgroundImg = new Image();
+    backgroundImg.src = "images/bg0.png";
+
+    const basket = { x: 160, y: 550, width: 80, height: 20 };
+
+    const foodList = [
+      { file: "GM1.png", type: "meat", health: "good" },
+      { file: "GM2.png", type: "meat", health: "good" },
+      { file: "GM3.png", type: "meat", health: "good" },
+      { file: "GM4.png", type: "meat", health: "good" },
+      { file: "GM5.png", type: "meat", health: "good" },
+      { file: "BM1.png", type: "meat", health: "bad" },
+      { file: "BM2.png", type: "meat", health: "bad" },
+      { file: "BM3.png", type: "meat", health: "bad" },
+      { file: "GV1.png", type: "vegetable", health: "good" },
+      { file: "GV2.png", type: "vegetable", health: "good" },
+      { file: "GV3.png", type: "vegetable", health: "good" },
+      { file: "GV4.png", type: "vegetable", health: "good" },
+      { file: "GV5.png", type: "vegetable", health: "good" },
+      { file: "GStrach1.png", type: "rice", health: "good" },
+      { file: "GStrach2.png", type: "rice", health: "good" },
+      { file: "GStrach3.png", type: "rice", health: "good" },
+      { file: "BStrach1.png", type: "rice", health: "bad" },
+      { file: "BStrach2.png", type: "rice", health: "bad" }
+    ];
+
+    let currentFood = null;
+    const stats = {
+      1: { good: 0, bad: 0 },
+      2: { good: 0, bad: 0 },
+      3: { good: 0, bad: 0 }
+    };
+
+    function showScreen(id) {
+      for (let key in screens) {
+        screens[key].classList.remove("active");
+      }
+      screens[id].classList.add("active");
+    }
+
+    function showLevelNotice(text, callback) {
+      levelNotice.innerText = text;
+      levelNotice.style.display = "block";
+      setTimeout(() => {
+        levelNotice.style.display = "none";
+        callback();
+      }, 2000);
+    }
+
+    function startGame(level) {
+      currentLevel = level;
+      score = 0;
+      remainingDrops = 10;
+      showScreen("gameCanvas");
+      backgroundImg.src = "images/bg0.png";
+      const notices = {
+        1: "健康飲食第一關：只吃健康肉",
+        2: "健康飲食第二關：只吃蔬菜",
+        3: "健康飲食第三關：只吃澱粉"
+      };
+      showLevelNotice(notices[level], () => {
+        spawnFood();
+        gameLoop();
+      });
+    }
+
+    function spawnFood() {
+      const food = foodList[Math.floor(Math.random() * foodList.length)];
+      const img = new Image();
+      img.src = `images/${food.file}`;
+      currentFood = {
+        ...food,
+        image: img,
+        x: Math.random() * 360,
+        y: 0,
+        size: 40,
+        speed: 3
+      };
+    }
+
+    function update() {
+      currentFood.y += currentFood.speed;
+      if (
+        currentFood.y + currentFood.size >= basket.y &&
+        currentFood.x > basket.x &&
+        currentFood.x < basket.x + basket.width
+      ) {
+        remainingDrops--;
+        const isCorrectType = (currentLevel === 1 && currentFood.type === "meat") ||
+                              (currentLevel === 2 && currentFood.type === "vegetable") ||
+                              (currentLevel === 3 && currentFood.type === "rice");
+        if (isCorrectType) {
+          if (currentFood.health === "good") {
+            score += 2;
+            stats[currentLevel].good++;
+            backgroundImg.src = "images/bg1.png";
+          } else {
+            score -= 2;
+            stats[currentLevel].bad++;
+            backgroundImg.src = "images/bg3.png";
+          }
+        } else {
+          score -= 1;
+          stats[currentLevel].bad++;
+          backgroundImg.src = "images/bg2.png";
+        }
+        setTimeout(() => backgroundImg.src = "images/bg0.png", 200);
+        if (remainingDrops > 0) {
+          spawnFood();
+        }
+      } else if (currentFood.y > 600) {
+        remainingDrops--;
+        if (remainingDrops > 0) {
+          spawnFood();
+        }
+      }
+    }
+
+    function draw() {
+      ctx.drawImage(backgroundImg, 0, 0, 400, 600);
+      ctx.fillStyle = "#666";
+      ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
+      if (currentFood.image.complete) {
+        ctx.drawImage(currentFood.image, currentFood.x, currentFood.y, currentFood.size, currentFood.size);
+      }
+      ctx.fillStyle = "black";
+      ctx.font = "28px Arial";
+      ctx.fillText(`關卡 ${currentLevel}`, 10, 40);
+      ctx.font = "20px Arial";
+      ctx.fillText(`分數: ${score}`, 10, 70);
+      ctx.fillText(`剩餘食物: ${remainingDrops}`, 10, 100);
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      if (remainingDrops <= 0) {
+        if (currentLevel < 3) {
+          setTimeout(() => startGame(currentLevel + 1), 1000);
+        } else {
+          setTimeout(() => showResult(), 1000);
+        }
+        return;
+      }
+      requestAnimationFrame(gameLoop);
+    }
+
+    document.addEventListener("mousemove", e => {
+      const rect = canvas.getBoundingClientRect();
+      basket.x = e.clientX - rect.left - basket.width / 2;
+    });
+
+    function showResult() {
+      showScreen("result");
+      let comment = "";
+      let image = "result3.png";
+      if (score >= 20) {
+        comment = "最健康";
+        image = "result1.png";
+      } else if (score >= 10) {
+        comment = "待加強";
+        image = "result2.png";
+      } else {
+        comment = "不健康";
+        image = "result3.png";
+      }
+      document.getElementById("result").style.backgroundImage = `url('images/${image}')`;
+      document.getElementById("scoreResult").innerHTML =
+        `<p>總分：${score}，評價：${comment}</p>` +
+        `<p>第一關：正確 ${stats[1].good}，錯誤 ${stats[1].bad}</p>` +
+        `<p>第二關：正確 ${stats[2].good}，錯誤 ${stats[2].bad}</p>` +
+        `<p>第三關：正確 ${stats[3].good}，錯誤 ${stats[3].bad}</p>`;
+    }
+
+    function restartGame() {
+      location.reload();
+    }
+  </script>
+</body>
+</html>
