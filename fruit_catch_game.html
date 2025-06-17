@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>健康接食物遊戲</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      overflow: hidden;
+    }
+    .screen {
+      display: none;
+      width: 100vw;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    .active {
+      display: flex;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 20px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 封面畫面 -->
+  <div id="home" class="screen active">
+    <h1>健康接食物遊戲</h1>
+    <button onclick="showScreen('intro')">開始</button>
+  </div>
+
+  <!-- 說明畫面 -->
+  <div id="intro" class="screen">
+    <h2>遊戲說明</h2>
+    <p>依照正確飲食順序來接住食物：</p>
+    <ol>
+      <li>第一關：先吃肉（蛋白質）</li>
+      <li>第二關：再吃菜（蔬菜）</li>
+      <li>第三關：最後吃澱粉</li>
+    </ol>
+    <button onclick="startGame(1)">開始遊戲</button>
+  </div>
+
+  <!-- 遊戲畫面 -->
+  <canvas id="gameCanvas" width="400" height="600" class="screen"></canvas>
+
+  <!-- 結算畫面 -->
+  <div id="result" class="screen">
+    <h2>遊戲結束</h2>
+    <p id="scoreResult"></p>
+    <button onclick="restartGame()">再玩一次</button>
+  </div>
+
+  <script>
+    const screens = {
+      home: document.getElementById("home"),
+      intro: document.getElementById("intro"),
+      gameCanvas: document.getElementById("gameCanvas"),
+      result: document.getElementById("result")
+    };
+
+    let currentLevel = 1;
+    let score = 0;
+
+    function showScreen(id) {
+      for (let key in screens) {
+        screens[key].classList.remove("active");
+      }
+      screens[id].classList.add("active");
+    }
+
+    function startGame(level) {
+      currentLevel = level;
+      score = 0;
+      showScreen("gameCanvas");
+      runLevel(level);
+    }
+
+    function runLevel(level) {
+      const ctx = screens.gameCanvas.getContext("2d");
+      let basket = { x: 160, y: 550, width: 80, height: 20 };
+      let food = { x: Math.random() * 360, y: 0, size: 30, speed: 3 };
+      const targets = ["肉類", "蔬菜", "澱粉"];
+
+      function resetFood() {
+        food.x = Math.random() * 360;
+        food.y = 0;
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, 400, 600);
+        ctx.fillStyle = "#ccc";
+        ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
+
+        ctx.fillStyle = level === 1 ? "brown" : level === 2 ? "green" : "orange";
+        ctx.beginPath();
+        ctx.arc(food.x, food.y, food.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "black";
+        ctx.fillText("關卡: " + level + "  得分: " + score, 10, 30);
+      }
+
+      function update() {
+        food.y += food.speed;
+        if (
+          food.y + food.size / 2 >= basket.y &&
+          food.x > basket.x &&
+          food.x < basket.x + basket.width
+        ) {
+          score++;
+          resetFood();
+        }
+        if (food.y > 600) {
+          resetFood();
+        }
+      }
+
+      function loop() {
+        update();
+        draw();
+        if (score >= 5) {
+          if (currentLevel < 3) {
+            startGame(currentLevel + 1);
+          } else {
+            showResult();
+          }
+          return;
+        }
+        requestAnimationFrame(loop);
+      }
+
+      document.addEventListener("mousemove", e => {
+        const rect = screens.gameCanvas.getBoundingClientRect();
+        basket.x = e.clientX - rect.left - basket.width / 2;
+      });
+
+      loop();
+    }
+
+    function showResult() {
+      showScreen("result");
+      let comment = score >= 12 ? "最健康" : score >= 8 ? "待加強" : "不健康";
+      document.getElementById("scoreResult").innerText = `你的總得分是 ${score}，飲食評價：${comment}`;
+    }
+
+    function restartGame() {
+      showScreen("home");
+    }
+  </script>
+</body>
+</html>
