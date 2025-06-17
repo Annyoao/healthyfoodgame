@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>營養接接樂</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      background: url('images/bg0.png') no-repeat center center;
+      background-size: cover;
+    }
+    .screen {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      width: 100vw;
+      height: 100vh;
+      text-align: center;
+      position: relative;
+      background-size: cover;
+      background-position: center;
+    }
+    .active {
+      display: flex;
+    }
+    .hotspot {
+      position: absolute;
+      width: 250px;
+      height: 60px;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      cursor: pointer;
+    }
+    #permissionTip {
+      position: absolute;
+      bottom: 150px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.9);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 16px;
+      color: #000;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="home" class="screen active" style="background-image: url('images/cover.png');">
+    <div class="hotspot" onclick="showScreen('intro')"></div>
+  </div>
+
+  <div id="intro" class="screen" style="background-image: url('images/intro.png');">
+    <div id="permissionTip">請點擊允許「裝置方向存取」以啟用搖晃控制</div>
+    <div class="hotspot" onclick="startGame()"></div>
+  </div>
+
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+
+  <div id="result" class="screen">
+    <div id="scoreResult"></div>
+    <div class="hotspot" onclick="location.reload()"></div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const basket = { x: 160, y: 550, width: 80, height: 20 };
+    let currentFood = null;
+    let foodList = [], dropsLeft = 10, score = 0, level = 1;
+    let stats = { 1:{good:0,bad:0}, 2:{good:0,bad:0}, 3:{good:0,bad:0} };
+    let bgImg = new Image();
+    bgImg.src = "images/bg0.png";
+    const permissionTip = document.getElementById("permissionTip");
+
+    const allFoods = [
+      { file: "GM1.png", type: "meat", health: "good" },
+      { file: "BM1.png", type: "meat", health: "bad" },
+      { file: "GV1.png", type: "vegetable", health: "good" },
+      { file: "GStrach1.png", type: "rice", health: "good" },
+      { file: "BStrach1.png", type: "rice", health: "bad" }
+    ];
+
+    function showScreen(id) {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+
+    function startGame() {
+      showScreen("gameCanvas");
+      requestDeviceOrientation();
+      level = 1;
+      score = 0;
+      dropsLeft = 10;
+      spawnFood();
+      loop();
+    }
+
+    function spawnFood() {
+      const f = allFoods[Math.floor(Math.random() * allFoods.length)];
+      const img = new Image();
+      img.src = `images/${f.file}`;
+      currentFood = {
+        ...f,
+        image: img,
+        x: Math.random() * 360,
+        y: 0,
+        size: 40,
+        speed: 3
+      };
+    }
+
+    function update() {
+      if (!currentFood) return;
+      currentFood.y += currentFood.speed;
+      if (
+        currentFood.y + currentFood.size >= basket.y &&
+        currentFood.x > basket.x &&
+        currentFood.x < basket.x + basket.width
+      ) {
+        handleCatch(currentFood);
+        dropsLeft--;
+        if (dropsLeft > 0) spawnFood();
+        else nextLevel();
+      } else if (currentFood.y > 600) {
+        dropsLeft--;
+        if (dropsLeft > 0) spawnFood();
+        else nextLevel();
+      }
+    }
+
+    function handleCatch(food) {
+      const typeMatch = (level === 1 && food.type === 'meat') ||
+                        (level === 2 && food.type === 'vegetable') ||
+                        (level === 3 && food.type === 'rice');
+      if (typeMatch) {
+        if (food.health === 'good') {
+          score += 2;
+          stats[level].good++;
+          bgImg.src = "images/bg1.png";
+        } else {
+          score -= 2;
+          stats[level].bad++;
+          bgImg.src = "images/bg3.png";
+        }
+      } else {
+        score -= 1;
+        stats[level].bad++;
+        bgImg.src = "images/bg2.png";
+      }
+      setTimeout(() => { bgImg.src = "images/bg0.png"; }, 300);
+    }
+
+    function draw() {
+      ctx.drawImage(bgImg, 0, 0, 400, 600);
+      ctx.fillStyle = "gray";
+      ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
+      if (currentFood?.image?.complete)
+        ctx.drawImage(currentFood.image, currentFood.x, currentFood.y, currentFood.size, currentFood.size);
+      ctx.fillStyle = "black";
+      ctx.fillText(`關卡 ${level} 分數:${score}`, 10, 20);
+    }
+
+    function loop() {
+      update();
+      draw();
+      if (level <= 3) requestAnimationFrame(loop);
+    }
+
+    function nextLevel() {
+      if (level < 3) {
+        level++;
+        dropsLeft = 10;
+        spawnFood();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      showScreen("result");
+      let comment = score >= 20 ? "最健康" : score >= 10 ? "待加強" : "不健康";
+      let bg = score >= 20 ? "result1.png" : score >= 10 ? "result2.png" : "result3.png";
+      document.getElementById("result").style.backgroundImage = `url('images/${bg}')`;
+      document.getElementById("scoreResult").innerHTML = `總分：${score}<br>${comment}<br>
+        第1關：✔️${stats[1].good} ❌${stats[1].bad}<br>
+        第2關：✔️${stats[2].good} ❌${stats[2].bad}<br>
+        第3關：✔️${stats[3].good} ❌${stats[3].bad}`;
+    }
+
+    function requestDeviceOrientation() {
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        permissionTip.style.display = 'block';
+        DeviceOrientationEvent.requestPermission().then(response => {
+          if (response === 'granted') {
+            window.addEventListener("deviceorientation", handleOrientation);
+            permissionTip.style.display = 'none';
+          }
+        }).catch(() => {
+          permissionTip.textContent = "裝置方向權限未開啟，請在設定中允許";
+        });
+      } else {
+        window.addEventListener("deviceorientation", handleOrientation);
+      }
+    }
+
+    function handleOrientation(event) {
+      const tilt = event.gamma;
+      if (tilt != null) {
+        basket.x += tilt * 0.5;
+        basket.x = Math.max(0, Math.min(320, basket.x));
+      }
+    }
+  </script>
+</body>
+</html>
