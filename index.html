@@ -8,34 +8,29 @@
     html, body {
       margin: 0;
       padding: 0;
+      height: 100dvh; /* ⬅️ 使用實際可視高度 */
+      width: 100vw;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
       height: 100dvh;
-      background-image: url('images/bg0.png');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      position: fixed;
-        }
-    canvas {
-      background-color: transparent;
-      width: 100vw;
-      height: 100dvh;
-      display: block;
-    }
-
-    .screen {
       display: none;
+    }
+    
+    .active {
+      display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      width: 100vw;
-      height: 100vh;
-      text-align: center;
-      position: fixed;
-      background-size: cover;
-      background-position: center;
-    }
-    .active {
-      display: flex;
     }
     .hotspot {
       position: absolute;
