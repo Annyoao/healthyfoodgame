@@ -175,22 +175,27 @@
 
     function update() {
       if (!currentFood) return;
+    
       currentFood.y += currentFood.speed;
-      if (
-        currentFood.y + currentFood.size >= basket.y &&
-        currentFood.x > basket.x &&
-        currentFood.x < basket.x + basket.width
-      ) {
-        handleCatch(currentFood);
+    
+      const caught = currentFood.y + currentFood.size >= basket.y &&
+                     currentFood.x > basket.x &&
+                     currentFood.x < basket.x + basket.width;
+    
+      const missed = currentFood.y > canvas.height;
+    
+      if (caught || missed) {
+        if (caught) handleCatch(currentFood);
         currentFood = null;
-        if (foodQueue.length > 0) spawnFood();
-        else showTransition();
-      } else if (currentFood.y > canvas.height) {
-        currentFood = null;
-        if (foodQueue.length > 0) spawnFood();
-        else showTransition();
+    
+        if (foodQueue.length > 0) {
+          spawnFood(); // 掉下一個
+        } else {
+          showTransition(); // 換關
+        }
       }
     }
+
 
     function handleCatch(food) {
       const typeMatch = (level === 1 && food.type === 'meat') ||
