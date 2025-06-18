@@ -160,22 +160,21 @@
         if (food.health === 'good') {
           score += 2;
           stats[level].good++;
-          bgImg.src = "images/bg1.png";
+          bgImg = bgImages[1]; // 吃對
         } else {
           score -= 2;
           stats[level].bad++;
-          bgImg.src = "images/bg3.png";
+          bgImg = bgImages[3]; //不健康
         }
       } else {
         score -= 1;
         stats[level].bad++;
-        bgImg.src = "images/bg2.png";
+        bgImg = bgImages[2]; // 順序錯
       }
-        if (bgTimeout) clearTimeout(bgTimeout); 
-        bgTimeout = setTimeout(() => {
-        bgImg.onload = () => {};  // optional: 可放 log 或後續處理
-        bgImg.src = "images/bg0.png";
-        }, 3000);
+      if (bgTimeout) clearTimeout(bgTimeout);
+      bgTimeout = setTimeout(() => {
+        bgImg = bgImages[0];
+      }, 3000);
     }
 
     function draw() {
