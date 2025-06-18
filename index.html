@@ -282,17 +282,6 @@
   `;
 }
 
-    //function showResult() {
-      showScreen("result");
-      let comment = score >= 20 ? "最健康" : score >= 10 ? "待加強" : "不健康";
-      let bg = score >= 20 ? "result1.png" : score >= 10 ? "result2.png" : "result3.png";
-      document.getElementById("result").style.backgroundImage = `url('images/${bg}')`;
-      document.getElementById("scoreResult").innerHTML = `總分：${score}<br>${comment}<br>
-        第1關：✔️${stats[1].good} ❌${stats[1].bad}<br>
-        第2關：✔️${stats[2].good} ❌${stats[2].bad}<br>
-        第3關：✔️${stats[3].good} ❌${stats[3].bad}`;
-    }
-
     function requestDeviceOrientation() {
       if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         permissionTip.style.display = 'block';
