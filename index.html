@@ -230,13 +230,17 @@
 
     function draw() {
       if (bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+      const bowlWidth = 120;
+      const bowlHeight = 80;
+      basket.width = bowlWidth;
+      basket.height = bowlHeight;
       if (bowlImg.complete) {
         ctx.drawImage(bowlImg, basket.x, basket.y, basket.width, basket.height);
       }
       if (currentFood?.image?.complete)
         ctx.drawImage(currentFood.image, currentFood.x, currentFood.y, currentFood.size, currentFood.size);
       ctx.fillStyle = "black";
-      ctx.fillText(`關卡 ${level} 分數:${score}`, 10, 20);
+      ctx.fillText(`關卡 ${level} 分數:${score}`, 10, 30);
     }
 
     function loop() {
