@@ -132,6 +132,7 @@
     }
 
     function spawnFood() {
+      if (currentFood) return; 
       const f = allFoods[Math.floor(Math.random() * allFoods.length)];
       const img = new Image();
       img.onload = () => {
