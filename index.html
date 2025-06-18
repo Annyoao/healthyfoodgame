@@ -158,7 +158,10 @@
         stats[level].bad++;
         bgImg.src = "images/bg2.png";
       }
-      setTimeout(() => { bgImg.src = "images/bg0.png"; }, 3000);
+      if (bgTimeout) clearTimeout(bgTimeout); 
+        bgTimeout = setTimeout(() => {
+          bgImg.src = "images/bg0.png";
+        }, 3000); 
     }
 
     function draw() {
