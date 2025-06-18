@@ -8,7 +8,7 @@
     html, body {
       margin: 0;
       padding: 0;
-      height: 100dvh; /* ⬅️ 使用實際可視高度 */
+      height: 100dvh; 
       width: 100vw;
       overflow: hidden;
       position: relative;
@@ -85,10 +85,23 @@
 
     const allFoods = [
       { file: "GM1.png", type: "meat", health: "good" },
+      { file: "GM2.png", type: "meat", health: "good" },
+      { file: "GM3.png", type: "meat", health: "good" },
+      { file: "GM4.png", type: "meat", health: "good" },
+      { file: "GM5.png", type: "meat", health: "good" },
       { file: "BM1.png", type: "meat", health: "bad" },
+      { file: "BM2.png", type: "meat", health: "bad" },
+      { file: "BM3.png", type: "meat", health: "bad" },
       { file: "GV1.png", type: "vegetable", health: "good" },
+      { file: "GV2.png", type: "vegetable", health: "good" },
+      { file: "GV3.png", type: "vegetable", health: "good" },
+      { file: "GV4.png", type: "vegetable", health: "good" },
+      { file: "GV5.png", type: "vegetable", health: "good" },
       { file: "GStrach1.png", type: "rice", health: "good" },
-      { file: "BStrach1.png", type: "rice", health: "bad" }
+      { file: "GStrach2.png", type: "rice", health: "good" },
+      { file: "GStrach3.png", type: "rice", health: "good" },
+      { file: "BStrach1.png", type: "rice", health: "bad" },
+      { file: "BStrach2.png", type: "rice", health: "bad" }
     ];
 
     function showScreen(id) {
@@ -115,7 +128,7 @@
         image: img,
         x: Math.random() * 360,
         y: 0,
-        size: 40,
+        size: 160,
         speed: 3
       };
     }
