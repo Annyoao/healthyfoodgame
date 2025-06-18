@@ -13,7 +13,6 @@
       overflow: hidden;
       position: relative;
     }
-    
     .screen {
       position: fixed;
       top: 0;
@@ -25,7 +24,6 @@
       background-repeat: no-repeat;
       display: none;
     }
-    
     .active {
       display: flex;
       justify-content: center;
@@ -65,7 +63,7 @@
     <div class="hotspot" onclick="startGame()"></div>
   </div>
 
-  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <canvas id="gameCanvas"></canvas>
 
   <div id="result" class="screen">
     <div id="scoreResult"></div>
@@ -75,13 +73,27 @@
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    const basket = { x: 160, y: 550, width: 80, height: 20 };
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const basket = { x: canvas.width / 2 - 40, y: canvas.height - 50, width: 80, height: 20 };
     let currentFood = null;
     let foodList = [], dropsLeft = 10, score = 0, level = 1;
     let stats = { 1:{good:0,bad:0}, 2:{good:0,bad:0}, 3:{good:0,bad:0} };
-    let bgImg = new Image();
-    bgImg.src = "images/bg0.png";
+    let bgTimeout = null;
     const permissionTip = document.getElementById("permissionTip");
+
+    const bgImages = {
+      0: new Image(),
+      1: new Image(),
+      2: new Image(),
+      3: new Image()
+    };
+    bgImages[0].src = "images/bg0.png";
+    bgImages[1].src = "images/bg1.png";
+    bgImages[2].src = "images/bg2.png";
+    bgImages[3].src = "images/bg3.png";
+    let bgImg = bgImages[0];
 
     const allFoods = [
       { file: "GM1.png", type: "meat", health: "good" },
@@ -122,15 +134,17 @@
     function spawnFood() {
       const f = allFoods[Math.floor(Math.random() * allFoods.length)];
       const img = new Image();
-      img.src = `images/${f.file}`;
-      currentFood = {
-        ...f,
-        image: img,
-        x: Math.random() * 360,
-        y: 0,
-        size: 80,
-        speed: 3
+      img.onload = () => {
+        currentFood = {
+          ...f,
+          image: img,
+          x: Math.random() * (canvas.width - 80),
+          y: 0,
+          size: 80,
+          speed: 3
+        };
       };
+      img.src = `images/${f.file}`;
     }
 
     function update() {
@@ -145,7 +159,7 @@
         dropsLeft--;
         if (dropsLeft > 0) spawnFood();
         else nextLevel();
-      } else if (currentFood.y > 600) {
+      } else if (currentFood.y > canvas.height) {
         dropsLeft--;
         if (dropsLeft > 0) spawnFood();
         else nextLevel();
@@ -160,16 +174,16 @@
         if (food.health === 'good') {
           score += 2;
           stats[level].good++;
-          bgImg = bgImages[1]; // 吃對
+          bgImg = bgImages[1];
         } else {
           score -= 2;
           stats[level].bad++;
-          bgImg = bgImages[3]; //不健康
+          bgImg = bgImages[3];
         }
       } else {
         score -= 1;
         stats[level].bad++;
-        bgImg = bgImages[2]; // 順序錯
+        bgImg = bgImages[2];
       }
       if (bgTimeout) clearTimeout(bgTimeout);
       bgTimeout = setTimeout(() => {
@@ -178,7 +192,9 @@
     }
 
     function draw() {
-      ctx.drawImage(bgImg, 0, 0, 400, 600);
+      if (bgImg.complete) {
+        ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+      }
       ctx.fillStyle = "gray";
       ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
       if (currentFood?.image?.complete)
@@ -234,7 +250,7 @@
       const tilt = event.gamma;
       if (tilt != null) {
         basket.x += tilt * 0.5;
-        basket.x = Math.max(0, Math.min(320, basket.x));
+        basket.x = Math.max(0, Math.min(canvas.width - basket.width, basket.x));
       }
     }
   </script>
