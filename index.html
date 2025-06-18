@@ -107,7 +107,10 @@
     };
 
     const bowlImg = new Image();
-       bowlImg.src = 'images/bowl.png'; //
+       bowlImg.src = 'images/bowl.png'; 
+    bowlImg.onload = () => {
+    console.log("籃子圖載入完成");
+  };
 
     const allFoods = [
       { file: "GM1.png", type: "meat", health: "good" },
@@ -227,8 +230,8 @@
 
     function draw() {
       if (bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-      if (basketImg.complete) {
-        ctx.drawImage(basketImg, basket.x, basket.y, basket.width, basket.height);
+      if (bowlImg.complete) {
+        ctx.drawImage(bowlImg, basket.x, basket.y, basket.width, basket.height);
       }
       if (currentFood?.image?.complete)
         ctx.drawImage(currentFood.image, currentFood.x, currentFood.y, currentFood.size, currentFood.size);
