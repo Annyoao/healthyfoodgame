@@ -106,6 +106,9 @@
       2: "images/K3.png"
     };
 
+    const bowlImg = new Image();
+       bowlImg.src = 'images/bowl.png'; //
+
     const allFoods = [
       { file: "GM1.png", type: "meat", health: "good" },
       { file: "GM2.png", type: "meat", health: "good" },
@@ -172,30 +175,34 @@
       };
       img.src = `images/${f.file}`;
     }
-
-    function update() {
-      if (!currentFood) return;
-    
-      currentFood.y += currentFood.speed;
-    
-      const caught = currentFood.y + currentFood.size >= basket.y &&
-                     currentFood.x > basket.x &&
-                     currentFood.x < basket.x + basket.width;
-    
-      const missed = currentFood.y > canvas.height;
-    
-      if (caught || missed) {
-        if (caught) handleCatch(currentFood);
-        currentFood = null;
-    
-        if (foodQueue.length > 0) {
-          spawnFood(); // 掉下一個
-        } else {
-          showTransition(); // 換關
-        }
-      }
+    function isColliding(food, basket) {
+      return (
+        food.x < basket.x + basket.width &&
+        food.x + food.size > basket.x &&
+        food.y < basket.y + basket.height &&
+        food.y + food.size > basket.y
+      );
     }
 
+    function update() {
+    if (!currentFood) return;
+  
+    currentFood.y += currentFood.speed;
+  
+    const caught = isColliding(currentFood, basket);
+    const missed = currentFood.y > canvas.height;
+  
+    if (caught || missed) {
+      if (caught) handleCatch(currentFood);
+      currentFood = null;
+  
+      if (foodQueue.length > 0) {
+        spawnFood(); // 掉下一個
+      } else {
+        showTransition(); // 換關
+      }
+    }
+  }
 
     function handleCatch(food) {
       const typeMatch = (level === 1 && food.type === 'meat') ||
@@ -220,8 +227,9 @@
 
     function draw() {
       if (bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "gray";
-      ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
+      if (basketImg.complete) {
+        ctx.drawImage(basketImg, basket.x, basket.y, basket.width, basket.height);
+      }
       if (currentFood?.image?.complete)
         ctx.drawImage(currentFood.image, currentFood.x, currentFood.y, currentFood.size, currentFood.size);
       ctx.fillStyle = "black";
