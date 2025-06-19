@@ -77,13 +77,13 @@
   </div>
 
   <script>
-    const bgm = new sounds('sounds/bgm.mp3');
+    const bgm = new Audio('sounds/bgm.mp3');
     bgm.loop = true;
     bgm.volume = 0.5;  // 設定音量
     
-    const goodSound = new sounds('sounds/good.mp3');
-    const badSound = new sounds('sounds/bad.mp3');
-    const wrongSound = new sounds('sounds/wrong.mp3');
+    const goodSound = new Audio('sounds/good.mp3');
+    const badSound = new Audio('sounds/bad.mp3');
+    const wrongSound = new Audio('sounds/wrong.mp3');
     
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -226,6 +226,7 @@
       score -= 2;
       stats[level].bad++;
       bgImg = bgImages[3]; // 不健康
+      badSound.currentTime = 0;
       badSound.play();   // 不健康音效
     } else if (
       (level === 1 && food.type === 'meat') ||
@@ -236,12 +237,14 @@
       score += 2;
       stats[level].good++;
       bgImg = bgImages[1]; // 正確
+      goodSound.currentTime = 0;
       goodSound.play();  // 正確音效
     } else {
       // 吃錯類別
       score -= 1;
       stats[level].bad++;
       bgImg = bgImages[2]; // 順序錯
+      wrongSound.currentTime = 0;
       wrongSound.play(); // 順序錯誤音效
     }
 
