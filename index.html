@@ -294,24 +294,29 @@
       showScreen("gameCanvasContainer");
       prepareLevel();
     }
-    
-  function showResult() {
-  showScreen("result");
-  let bg = score >= 20 ? "result1.png" : score >= 10 ? "result2.png" : "result3.png";
-  document.getElementById("result").style.backgroundImage = `url('images/result_bg.png')`;
-  // 顯示單一總分
-  document.getElementById("scoreResult").innerHTML = `
-    <div style="
-      font-size: 60px;
-      color: red;
-      font-weight: bold;
-      text-shadow: 2px 2px 4px white;
-      margin-top: 100px;
-    ">
-      ${score} 分！
-    </div>
-  `;
-}
+
+    function showResult() {
+      showScreen("result");
+      // 根據分數決定背景圖
+      let bg = score >= 20 ? "result1.png" : score >= 10 ? "result2.png" : "result3.png";
+      document.getElementById("result").style.backgroundImage = `url('images/${bg}')`;
+      // 清空總分，稍後再顯示
+      document.getElementById("scoreResult").innerHTML = "";
+      // 延遲 0.8 秒後再顯示總分
+      setTimeout(() => {
+        document.getElementById("scoreResult").innerHTML = `
+          <div style="
+            font-size: 60px;
+            color: red;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px white;
+            margin-top: 50px;
+          ">
+            ${score} 分！
+          </div>
+        `;
+      }, 800); // 延遲時間可依你需要調整
+    }
 
     function requestDeviceOrientation() {
       if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
