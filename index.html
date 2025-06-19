@@ -243,8 +243,9 @@
       basket.width = 120; basket.height = 80;
       if (bowlImg.complete) ctx.drawImage(bowlImg, basket.x, basket.y, basket.width, basket.height);
       if (currentFood?.image?.complete) ctx.drawImage(currentFood.image, currentFood.x, currentFood.y, currentFood.size, currentFood.size);
+      ctx.font = "bold 36px sans-serif";
       ctx.fillStyle = "black";
-      ctx.fillText(`關卡 ${level} 分數:${score}`, 10, 30);
+      ctx.fillText(`關卡 ${level} 分數:${score}`, 10, 40);
     }
 
     function loop() {
