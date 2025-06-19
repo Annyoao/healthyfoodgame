@@ -82,6 +82,9 @@
     bgm.volume = 0.3;  // 設定音量
     
     const clickSound = new Audio('sounds/click.mp3');
+    const badSound = new Audio('sounds/bad.mp3');
+    const goodSound = new Audio('sounds/good.mp3');
+    const wrongSound = new Audio('sounds/wrong.mp3');
 
     function playSound(src, volume = 1) {
     const audio = new Audio(src);
