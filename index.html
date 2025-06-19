@@ -77,6 +77,14 @@
   </div>
 
   <script>
+    // 音訊設定
+    const bgm = new Audio('audio/bgm.mp3');
+    bgm.loop = true;
+    
+    const goodSound = new Audio('audio/good.mp3');
+    const badSound = new Audio('audio/bad.mp3');
+    const wrongSound = new Audio('audio/wrong.mp3');
+    
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     canvas.width = window.innerWidth;
@@ -145,6 +153,11 @@
       score = 0;
       prepareLevel();
       loop();
+      // 播放背景音樂
+      bgm.play().catch(() => {
+        console.log("音樂播放失敗，可能需要使用者互動");
+      });
+    }
     }
 
     function prepareLevel() {
@@ -213,6 +226,7 @@
       score -= 2;
       stats[level].bad++;
       bgImg = bgImages[3]; // 不健康
+      badSound.play();   // 不健康音效
     } else if (
       (level === 1 && food.type === 'meat') ||
       (level === 2 && food.type === 'vegetable') ||
@@ -222,11 +236,13 @@
       score += 2;
       stats[level].good++;
       bgImg = bgImages[1]; // 正確
+      goodSound.play();  // 正確音效
     } else {
       // 吃錯類別
       score -= 1;
       stats[level].bad++;
       bgImg = bgImages[2]; // 順序錯
+      wrongSound.play(); // 順序錯誤音效
     }
 
   if (bgTimeout) clearTimeout(bgTimeout);
