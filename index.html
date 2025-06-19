@@ -156,8 +156,9 @@
     }
 
     function handleClickFeedback() {
-      const audio = new Audio('sounds/click.mp3');
-      audio.play().catch(err => {
+    // 重設播放位置並播放聲音
+        clickSound.currentTime = 0;      
+        audio.play().catch(err => {
         console.warn("按鈕音效播放失敗:", err);
       });
       if (navigator.vibrate) {
