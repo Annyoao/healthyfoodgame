@@ -81,6 +81,8 @@
     bgm.loop = true;
     bgm.volume = 0.3;  // 設定音量
     
+    const clickSound = new Audio('sounds/click.mp3');
+
     function playSound(src, volume = 1) {
     const audio = new Audio(src);
     audio.volume = volume;
@@ -150,6 +152,17 @@
       document.getElementById(id).classList.add("active");
     }
 
+    function handleClickFeedback() {
+      const audio = new Audio('sounds/click.mp3');
+      audio.play().catch(err => {
+        console.warn("按鈕音效播放失敗:", err);
+      });
+      if (navigator.vibrate) {
+        navigator.vibrate(80);
+      }
+    }
+
+
     function startGame() {
       showScreen("gameCanvasContainer");
       requestDeviceOrientation();
@@ -163,7 +176,6 @@
       });
     }
   
-
     function prepareLevel() {
       foodQueue = [];
       const correctFoods = allFoods.filter(f =>
@@ -341,6 +353,17 @@
         basket.x = Math.max(0, Math.min(canvas.width - basket.width, basket.x));
       }
     }
+        // 按鈕音效與震動回饋設定
+          window.onload = () => {
+            document.querySelectorAll('.hotspot').forEach(button => {
+              const original = button.onclick;
+              button.onclick = (e) => {
+                handleClickFeedback(); // 播放音效與震動
+                if (typeof original === 'function') original.call(button, e); // 執行原本事件
+              };
+            });
+          };
+
   </script>
 </body>
 </html>
