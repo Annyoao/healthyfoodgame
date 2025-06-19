@@ -232,12 +232,10 @@
       if (bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
       const bowlWidth = 120;
       const bowlHeight = 80;
-      const bowlzaixs = 40;
       basket.width = bowlWidth;
       basket.height = bowlHeight;
-      basket.zaixs = bowlzaixs;
       if (bowlImg.complete) {
-        ctx.drawImage(bowlImg, basket.x, basket.y, basket.Z, basket.width, basket.zaixs);
+        ctx.drawImage(bowlImg, basket.x, basket.y, basket.width, basket.height);
       }
       if (currentFood?.image?.complete)
         ctx.drawImage(currentFood.image, currentFood.x, currentFood.y, currentFood.size, currentFood.size);
