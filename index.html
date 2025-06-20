@@ -82,24 +82,28 @@
     bgm.loop = true;
     bgm.volume = 0.2;
     const clickSound = new Audio('sounds/click.mp3');
-
-    function createSoundPool(src, poolSize = 5) {
-      const pool = Array.from({ length: poolSize }, () => new Audio(src));
-      let current = 0;
-      return {
-        play(volume = 1) {
-          const sound = pool[current];
-          sound.currentTime = 0;
-          sound.volume = volume;
-          sound.play().catch(err => console.warn("音效播放失敗:", err));
-          current = (current + 1) % pool.length;
-        }
-      };
-    }
-
     const goodSoundPool = createSoundPool('sounds/good.mp3');
     const badSoundPool = createSoundPool('sounds/bad.mp3');
     const wrongSoundPool = createSoundPool('sounds/wrong.mp3');
+
+    function createSoundPool(src, poolSize = 5) {
+    const pool = Array.from({ length: poolSize }, () => {
+      const audio = new Audio(src);
+      audio.preload = "auto";
+      return audio;
+    });
+  
+    let current = 0;
+    return {
+      play(volume = 1) {
+        const sound = pool[current];
+        sound.currentTime = 0;
+        sound.volume = volume;
+        sound.play().catch(err => console.warn("音效播放失敗:", err));
+        current = (current + 1) % pool.length;
+      }
+    };
+  }
 
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
