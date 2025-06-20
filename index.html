@@ -55,6 +55,8 @@
     }
     canvas {
       pointer-events: none;
+      z-index: -1;
+      position: relative;
     }
     
   </style>
@@ -155,11 +157,6 @@
       document.getElementById(id).classList.add("active");
     }
 
-    function handleClickFeedback() {
-      clickSound.currentTime = 0;
-      clickSound.play().catch(err => console.warn("click 音效播放失敗:", err));
-      if (navigator.vibrate) navigator.vibrate(80);
-    }
 
     function startGame() {
       showScreen("gameCanvasContainer");
