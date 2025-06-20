@@ -55,6 +55,7 @@
     }
     canvas {
       pointer-events: none;
+      z-index: -1;
     }
   </style>
 </head>
@@ -81,11 +82,12 @@
     const bgm = new Audio('sounds/bgm.mp3');
     bgm.loop = true;
     bgm.volume = 0.2;
-    const clickSound = new Audio('sounds/click.mp3');
-    const goodSoundPool = createSoundPool('sounds/good.mp3');
-    const badSoundPool = createSoundPool('sounds/bad.mp3');
-    const wrongSoundPool = createSoundPool('sounds/wrong.mp3');
-
+    const clickSoundPool = createSoundPool('sounds/click.mp3');
+    function handleClickFeedback() {
+      clickSoundPool.play();
+      if (navigator.vibrate) navigator.vibrate(80);
+    }
+    
     function createSoundPool(src, poolSize = 5) {
     const pool = Array.from({ length: poolSize }, () => {
       const audio = new Audio(src);
@@ -104,6 +106,9 @@
       }
     };
   }
+    const goodSoundPool = createSoundPool('sounds/good.mp3');
+    const badSoundPool = createSoundPool('sounds/bad.mp3');
+    const wrongSoundPool = createSoundPool('sounds/wrong.mp3');
 
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
