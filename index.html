@@ -192,6 +192,7 @@
         foodQueue.push(incorrectFoods[Math.floor(Math.random() * incorrectFoods.length)]);
       }
       spawnFood();
+      startLevelTimer(); // ← 加這行，開始計時
     }
 
     function spawnFood() {
@@ -258,6 +259,10 @@
       bgTimeout = setTimeout(() => { bgImg = bgImages[0]; }, 3000);
     }
 
+    let levelTime = 65; // 每關秒數可自訂
+    let timeLeft = levelTime;
+    let timerInterval = null;
+
     function draw() {
       if (bgImg.complete) ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
       basket.width = 120; basket.height = 80;
@@ -266,6 +271,22 @@
       ctx.font = "bold 24px sans-serif";
       ctx.fillStyle = "black";
       ctx.fillText(`關卡 ${level} 分數:${score}`, 10, 40);
+      // 顯示右上角倒數計時
+      ctx.textAlign = "right";
+      ctx.fillText(`剩餘時間: ${timeLeft}s`, canvas.width - 10, 40);
+      ctx.textAlign = "left"; // 恢復原本對齊方式
+    }
+
+    function startLevelTimer() {
+      timeLeft = levelTime;
+      clearInterval(timerInterval); // 清除舊計時器（若有）
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          showTransition(); // 時間到，自動換關或結束
+        }
+      }, 1000); // 每秒遞減
     }
 
     function loop() {
@@ -275,6 +296,7 @@
     }
 
     function showTransition() {
+      clearInterval(timerInterval); 
       if (level < 3) {
         document.getElementById("betweenLevel").style.backgroundImage = `url('${transitionScreens[level]}')`;
         showScreen("betweenLevel");
@@ -288,6 +310,7 @@
     }
 
     function showResult() {
+      clearInterval(timerInterval); 
       showScreen("result");
       const bg = score >= 20 ? "result1.png" : score >= 10 ? "result2.png" : "result3.png";
       document.getElementById("result").style.backgroundImage = `url('images/${bg}')`;
